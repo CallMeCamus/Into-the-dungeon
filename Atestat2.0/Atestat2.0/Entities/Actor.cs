@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 namespace Atestat2._0.Entities
@@ -12,7 +13,9 @@ namespace Atestat2._0.Entities
         public int Defense { get; set; } // defensive strength
         public int DefenseChance { get; set; } // percent chance of successfully blocking a hit
         public int Gold { get; set; } // amount of gold carried
-        
+
+        public List<Item> Inventory = new List<Item>(); // the player's collection of items
+
         protected Actor (Color foreground, Color background, int glyph, int width = 1, int height = 1) : base(foreground, background, glyph, width, height)
         {
             Animation.CurrentFrame[0].Foreground = foreground;
@@ -29,9 +32,19 @@ namespace Atestat2._0.Entities
                 // if there's a monster here,
                 // do a bump attack
                 Monster monster = GameLoop.World.CurrentMap.GetEntityAt<Monster>(Position + positionChange);
+                Item item = GameLoop.World.CurrentMap.GetEntityAt<Item>(Position + positionChange);
+
                 if(monster != null)
                 {
                     GameLoop.CommandManager.Attack(this, monster);
+                    return true;
+                }
+
+                // if there's an item here,
+                // try to pick it up
+                else if(item != null)
+                {
+                    GameLoop.CommandManager.PickUp(this, item);
                     return true;
                 }
 

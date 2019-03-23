@@ -14,7 +14,7 @@ namespace Atestat2._0.UI
 
         // a Queue works using a FIFO structure, where the first line added
         // is the first line removed when we exceed the max number of lines
-        private readonly Queue<string> _lines;
+        private readonly Queue<ColoredString> _lines;
 
         // the messageConsole displays the active messages
         private SadConsole.ScrollingConsole _messageConsole;
@@ -35,7 +35,7 @@ namespace Atestat2._0.UI
         {
             // Ensure that the window background is the correct colour
             Theme.WindowTheme.FillStyle.Background = DefaultBackground;
-            _lines = new Queue<string>();
+            _lines = new Queue<ColoredString>();
             CanDrag = true;
             Title = title.Align(HorizontalAlignment.Center, width);
 
@@ -65,7 +65,7 @@ namespace Atestat2._0.UI
         }
 
         //add a line to the queue of messages
-        public void Add(string message)
+        public void Add(ColoredString message)
         {
             _lines.Enqueue(message);
             // when exceeding the max number of lines remove the oldest one

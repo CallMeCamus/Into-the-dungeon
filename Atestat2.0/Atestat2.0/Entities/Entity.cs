@@ -17,6 +17,8 @@ namespace Atestat2._0.Entities
             Animation.IsVisible = false;
             // Create a new unique identifier for this entity
             ID = Map.IDGenerator.UseID();
+
+            Components.Add(new SadConsole.Components.EntityViewSyncComponent());
         }
     }
 }

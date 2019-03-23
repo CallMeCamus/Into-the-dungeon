@@ -49,22 +49,6 @@ namespace Atestat2._0.UI
             MessageLog.Position = new Point(0, GameLoop.GameHeight / 2);
 
 
-            MessageLog.Add("Testing 123");
-            MessageLog.Add("Testing 1224");
-            MessageLog.Add("Testing 123");
-            MessageLog.Add("Testing 12543");
-            MessageLog.Add("Testing 123");
-            MessageLog.Add("Testing 1253");
-            MessageLog.Add("Testing 1212");
-            MessageLog.Add("Testing 1");
-            MessageLog.Add("Testing");
-            MessageLog.Add("Testing 122");
-            MessageLog.Add("Testing 51");
-            MessageLog.Add("Testing");
-            MessageLog.Add("Testing 162");
-            MessageLog.Add("Testing 16");
-            MessageLog.Add("Testing Last");
-
             //Stats console initialization
             StatWindow = new StatsWindow(GameLoop.GameWidth / 2, GameLoop.GameHeight / 2, "Stats");
             

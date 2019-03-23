@@ -70,6 +70,18 @@ namespace Atestat2._0.Commands
             return false;
         }
 
+        // Tries to pick up an Item and add it to the Actor's
+        // inventory list
+        public void PickUp(Actor actor, Item item)
+        {
+            // Add the item to the Actor's inventory list
+            // and then destroy it
+            actor.Inventory.Add(item);
+            item.Destroy();
+            ColoredString message = new ColoredString($"{actor.Name} picked up {item.Name}");
+            GameLoop.UIManager.MessageLog.Add(message);
+        }
+
         // Executes an attack from an attacking actor
         // on a defending actor, and then describes
         // the outcome of the attack in the Message Log
@@ -77,8 +89,8 @@ namespace Atestat2._0.Commands
         {
             // Create two messages that describe the outcome
             // of the attack and defense
-            StringBuilder attackMessage = new StringBuilder();
-            StringBuilder defenseMessage = new StringBuilder();
+            ColoredString attackMessage = new ColoredString("");
+            ColoredString defenseMessage = new ColoredString("");
 
             // Count up the amount of attacking damage done
             // and the number of successful blocks
@@ -86,10 +98,10 @@ namespace Atestat2._0.Commands
             int blocks = ResolveDefense(defender, hits, attackMessage, defenseMessage);
 
             // Display the outcome of the attack & defense
-            GameLoop.UIManager.MessageLog.Add(attackMessage.ToString());
+            GameLoop.UIManager.MessageLog.Add(attackMessage);
             if(!string.IsNullOrWhiteSpace(defenseMessage.ToString()))
             {
-                GameLoop.UIManager.MessageLog.Add(defenseMessage.ToString());
+                GameLoop.UIManager.MessageLog.Add(defenseMessage);
             }
 
             int damage = hits - blocks;
@@ -103,11 +115,11 @@ namespace Atestat2._0.Commands
         // AttackChance and a random d100 roll as the basis.
         // Modifies a StringBuilder message that will be displayed
         // in the MessageLog
-        private static int ResolveAttack(Actor attacker, Actor defender, StringBuilder attackMessage)
+        private static int ResolveAttack(Actor attacker, Actor defender, ColoredString attackMessage)
         {
             // Create a string that expresses the attacker and defender's names
             int hits = 0;
-            attackMessage.AppendFormat("{0} attacks {1}, ", attacker.Name, defender.Name);
+            attackMessage.String += ($"{attacker.Name} attacks {defender.Name}, ");
 
             // The attacker's Attack value determines the number of D100 dice rolled
             for(int i = 0; i < attacker.Attack; i++)
@@ -128,14 +140,14 @@ namespace Atestat2._0.Commands
         // at blocking incoming hits.
         // Modifies a StringBuilder messages that will be displayed
         // in the MessageLog, expressing the number of hits blocked.
-        private static int ResolveDefense(Actor defender, int hits, StringBuilder attackMessage, StringBuilder defenseMessage)
+        private static int ResolveDefense(Actor defender, int hits, ColoredString attackMessage, ColoredString defenseMessage)
         {
             int blocks = 0;
             if (hits > 0)
             {
                 // Create a string that displays the defender's name and outcomes
-                attackMessage.AppendFormat("scoring {0} hits.", hits);
-                defenseMessage.AppendFormat("{0} defends and rolls ", defender.Name);
+                attackMessage.String += ($"scoring {hits} hits.");
+                defenseMessage.String += ($"{defender.Name} defends and rolls ");
 
                 //The defender's Defense value determines the number of D100 dice rolled
                 for (int i = 0; i < defender.Defense; i++)
@@ -150,11 +162,11 @@ namespace Atestat2._0.Commands
                         blocks++;
                     }
                 }
-                defenseMessage.AppendFormat("resulting in {0} blocks.", blocks);
+                defenseMessage.String += ($"resulting in {blocks} blocks.");
             }
             else
             {
-                attackMessage.Append("and misses completely!;");
+                attackMessage.String += ("and misses completely!;");
             }
             return blocks;
         }
@@ -167,7 +179,8 @@ namespace Atestat2._0.Commands
             if(damage > 0)
             {
                 defender.Health -= damage;
-                GameLoop.UIManager.MessageLog.Add($" {defender.Name} was hit for {damage} damage");
+                ColoredString message = new ColoredString($" {defender.Name} was hit for {damage} damage");
+                GameLoop.UIManager.MessageLog.Add(message);
 
                 if(defender.Health <= 0)
                 {
@@ -176,24 +189,64 @@ namespace Atestat2._0.Commands
             }
             else
             {
-                GameLoop.UIManager.MessageLog.Add($"{defender.Name} blocked all damage!");
+                ColoredString message = new ColoredString($"{defender.Name} blocked all damage!");
+                GameLoop.UIManager.MessageLog.Add(message);
             }
         }
 
         // Removes an Actor that has died
         // and displays a message showing
-        // the number of Gold dropped.
+        // the actor that has died, and they loot they dropped
         private static void ResolveDeath(Actor actor)
         {
+            // Set up a customized death message
+            ColoredString deathMessage = new ColoredString($"{actor.Name} has died");
+
+            // dump the dead actor's inventory (if any)
+            // at the map position where it died
+            if(actor.Inventory.Count > 0)
+            {
+                deathMessage.String += (" and dropped");
+
+                foreach (Item item in actor.Inventory)
+                {
+                    // move the Item to the place where the actor died
+                    item.Position = actor.Position;
+
+                    // Now let the MultiSpatialMap know that the Item is visible
+                    
+                    GameLoop.World.CurrentMap.Add(item);
+                    
+                    // Append the item to the deathMessage
+                    deathMessage.String += (", " + item.Name);
+                }
+
+                // Clear the actor's inventory. Not strictly
+                // necessary, but makes for good coding habits!
+                actor.Inventory.Clear();
+            }
+            else
+            {
+                // The monster carries no loot, so don't show any loot dropped
+                deathMessage.String += (".");
+            }
+
+            // actor goes bye-bye
             GameLoop.World.CurrentMap.Remove(actor);
 
-            if(actor is Player)
+            // Now show the deathMessage in the messagelog
+            GameLoop.UIManager.MessageLog.Add(deathMessage);
+
+
+            if (actor is Player)
             {
-                GameLoop.UIManager.MessageLog.Add($" {actor.Name} was killed.");
+                ColoredString message = new ColoredString($" {actor.Name} was killed.");
+                GameLoop.UIManager.MessageLog.Add(message);
             }
             else if(actor is Monster)
             {
-                GameLoop.UIManager.MessageLog.Add($"{actor.Name} died and dropped {actor.Gold} gold coins.");
+                ColoredString message = new ColoredString($"{actor.Name} died and dropped {actor.Gold} gold coins.");
+                GameLoop.UIManager.MessageLog.Add(message);
 
                 //Update the player stats and call the refresh function to draw them
                 GameLoop.World.Player.Gold += actor.Gold;

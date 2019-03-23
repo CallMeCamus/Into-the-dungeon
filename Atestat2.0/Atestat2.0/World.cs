@@ -5,6 +5,7 @@ using Atestat2._0.Entities;
 using GoRogue;
 using System.Linq;
 using Atestat2._0.Entities.Monsters;
+using SadConsole;
 
 namespace Atestat2._0
 {
@@ -36,6 +37,8 @@ namespace Atestat2._0
             CreatePlayer();
 
             CreateMonsters();
+
+            CreateLoot();
         }
 
         // Create a new map using the Map class
@@ -68,7 +71,6 @@ namespace Atestat2._0
             }
 
             // Add the ViewPort sync Component to the player
-            Player.Components.Add(new EntityViewSyncComponent());
             
             CurrentMap.Add(Player);
         }
@@ -92,7 +94,7 @@ namespace Atestat2._0
             {
                 int monsterPosition = 0;
                 Troll newMonster = new Troll();
-                newMonster.Components.Add(new EntityViewSyncComponent());
+               
                 while(CurrentMap.Tiles[monsterPosition].IsBlockingMove)
                 {
                     // pick a random spot on the map
@@ -104,6 +106,39 @@ namespace Atestat2._0
                 // in the next revision of SadConsole
                 newMonster.Position = new Point(monsterPosition % CurrentMap.Width, monsterPosition / CurrentMap.Width);
                 CurrentMap.Add(newMonster);
+            }
+        }
+
+        // Create some sample treasure
+        // that can be picked up on the map
+        private void CreateLoot()
+        {
+            // number of treasure drops to create
+            int numLoot = 20;
+
+            Random rndNum = new Random();
+
+            // Produce lot up to a max of numLoot
+            for(int i = 0; i < numLoot; i++)
+            {
+                // Create an Item with some standard attributes
+                int itemPosition = 0;
+                Item newItem = new Item(Color.Green, Color.Transparent, "fancy shirt", 'L', 2);
+                
+
+                // Try placing the Item at lootPosition; if this fails, try random positions on the map's tile array
+                while (CurrentMap.Tiles[itemPosition].IsBlockingMove)
+                {
+                    // pick a random spot on the map
+                    itemPosition = rndNum.Next(0, CurrentMap.Width * CurrentMap.Height);
+                }
+
+
+                // set the loot's new position
+                newItem.Position = new Point(itemPosition % CurrentMap.Width, itemPosition / CurrentMap.Width);
+
+                // add the Item to the MultiSpatialMap
+                CurrentMap.Add(newItem);
             }
         }
 
@@ -143,8 +178,8 @@ namespace Atestat2._0
             //Make sure the console will update the screen
             GameLoop.UIManager.MapConsole.IsDirty = true;
 
-
-            GameLoop.UIManager.MessageLog.Add("Seen " + Convert.ToString(GameLoop.World.FOVMap.NewlySeen.Count()));
+            ColoredString message = new ColoredString("Seen " + Convert.ToString(GameLoop.World.FOVMap.NewlySeen.Count()));
+            GameLoop.UIManager.MessageLog.Add(message);
         }
     }
 }

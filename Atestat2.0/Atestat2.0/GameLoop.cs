@@ -30,7 +30,7 @@ namespace Atestat2._0
         static void Main(string[] args)
         {
             // Setup the engine and creat the main window.
-            SadConsole.Game.Create("IBM.font", GameWidth, GameHeight);
+            SadConsole.Game.Create( GameWidth, GameHeight);
             
             // Hook the start event so we can add consoles to the system.
             SadConsole.Game.OnInitialize = Init;
@@ -50,7 +50,9 @@ namespace Atestat2._0
         }
 
         private static void Init()
-        { 
+        {
+            SadConsole.Game.Instance.Window.Title = "Into the dungeon - Powered by SadConsole";
+
             //Instantiate the UIManager
             UIManager = new UIManager();
 

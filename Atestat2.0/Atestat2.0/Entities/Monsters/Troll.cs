@@ -17,6 +17,7 @@ namespace Atestat2._0.Entities.Monsters
             AttackChance = rndNum.Next(0, 50);
             Gold = rndNum.Next(0, 10);
             Name = "a common troll";
+
         }
     }
 }
